@@ -7,10 +7,14 @@ import service.response.StudentNewClass;
 import java.io.PrintStream;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * Service class which outputs the student’s schedules for the next semester based on the classes
  * they’ve taken in the current semester. It takes in new Class objects, describing the classes of the next semester.
  */
+@Component("reportService")
 public class ScheduleReportService implements ReportService {
     private PrintStream stream;
     private ClassDAO classDAO;
@@ -69,6 +73,7 @@ public class ScheduleReportService implements ReportService {
         }
     }
 
+    @Autowired
     public void setClasses(List<Class> classes) {
         this.classes = classes;
     }

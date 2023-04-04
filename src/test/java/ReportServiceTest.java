@@ -2,6 +2,13 @@ import dao.ClassDAO;
 import model.Class;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import service.report.ReportService;
 import service.report.ScheduleReportService;
 import service.response.StudentNewClass;
@@ -11,7 +18,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: Add appropriate annotations to wire up this test using the context.xml file
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(locations = "file:src/test/resources/ReportServiceTestContext.xml")
 public class ReportServiceTest {
     String correctOutput = "Printing new schedule: " + System.getProperty("line.separator") +
             "Report {studentID=12345, name='C. Brown', address='12 Apple St.', phone='555-1234'}" +
@@ -27,14 +35,22 @@ public class ReportServiceTest {
             "          Class{classID=10000, className='PH201', room='Room 1', professor='Dr. Evil'}"
             + System.getProperty("line.separator");
 
+    @Autowired
     ClassDAO classDAOMock;
 
+    @Autowired
     ReportService reportService;
 
+    @Autowired
+    @Qualifier("newClasses")
     List<StudentNewClass> newClasses;
 
+    @Autowired
+    @Qualifier("classList1")
     List<Class> classList1;
 
+    @Autowired
+    @Qualifier("classList2")
     List<Class> classList2;
 
     @Test
@@ -46,6 +62,7 @@ public class ReportServiceTest {
         Assertions.assertEquals(classDAOMock, scheduleService.getClassDAO(), "classDAOMock was not injected");
         Assertions.assertNotNull(scheduleService.getClasses(), "List<Class> classes was not injected in ScheduleReportService");
     }
+
     @Test
     public void correctNewClassesList() {
         List<StudentNewClass> expectedNewClasses = new ArrayList<>();
@@ -76,7 +93,9 @@ public class ReportServiceTest {
         ByteArrayOutputStream savedOutput = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(savedOutput);
 
-        // TODO: Insert Mockito.when() code here:
+        Mockito.when(classDAOMock.getNewClasses()).thenReturn(newClasses);
+        Mockito.when(classDAOMock.queryClassesByName("EE300")).thenReturn(classList1);
+        Mockito.when(classDAOMock.queryClassesByName("PH201")).thenReturn(classList2);
 
         reportService.printReport(ps);
         Assertions.assertEquals(correctOutput, savedOutput.toString());
